@@ -32,6 +32,8 @@ public class ControllerServlet extends HttpServlet {
 
 		String contextPath = request.getContextPath(); // "WebBasic"
 		String path = request.getRequestURI().substring(contextPath.length()); // path = /mvc/aaa, /mvc/bbb, /mvc/ccc ...
+
+		System.out.println(path); // 왜 path = null인게 한번씩 더 출력?
 		
 		switch (path) {
 		case "/mvc/list":
