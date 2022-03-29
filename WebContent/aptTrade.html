@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>아파트 매매</title>
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h4>아파트 매매</h4>
+    <table>
+        <tbody id="tbodyAptTrade">
+            <tr><td>아파트 매매 내역이 없습니다.</td></tr>
+        </tbody>
+    </table>
+    <br>
+    <button id="btnAptXml">xml 가져오기</button>
+    <button id="btnAptJson">json 가져오기</button>
+    
+    <script>
+    window.onload = function(){
+        document.querySelector("#btnAptXml").onclick = function(){
+            getAptXml();
+        }
+
+        document.querySelector("#btnAptJson").onclick = function(){
+            getAptJson();
+        }
+    }
+
+    function getAptXml(){
+        let pageNo = "1";
+        let numOfRows = "10";
+        let DEAL_YMD = "202112";
+        let LAWD_CD = "11110";
+        let url = "/WebBasic/apttrade";
+
+        $.ajax( {
+            url: url,
+            dataType: "xml",
+            data: {
+                pageNo: pageNo,
+                numOfRows: numOfRows,
+                DEAL_YMD: DEAL_YMD,
+                LAWD_CD: LAWD_CD,
+                clsf: "raw"
+            },
+            success: function( data ){
+
+                let $tbodyAptTrade = $("#tbodyAptTrade");
+                $tbodyAptTrade.html('');
+
+                $(data).find("item").each( function( idx, obj ){
+                    let dong = $(obj).find("법정동").text();
+                    let aptName = $(obj).find("아파트").text();
+                    let code = $(obj).find("법정동읍면동코드").text();
+                    let dealAmount = $(obj).find("거래금액").text();
+
+                    let listHtml = `<tr><td>${dong}</td><td>${aptName}</td><td>${code}</td><td>${dealAmount}</td></tr>`;
+                    $tbodyAptTrade.append(listHtml);
+                });
+            },
+            error: function( jqXHR, textStatus, errorThrown){
+                console.log(errorThrown);
+            }
+        } );
+    }
+
+    async function getAptJson(){
+      let pageNo = "1";
+      let numOfRows = "10";
+      let DEAL_YMD = "202112";
+      let LAWD_CD = "11110";
+      let clsf = "json";
+      let params = `pageNo=${pageNo}&numOfRows=${numOfRows}&DEAL_YMD=${DEAL_YMD}&LAWD_CD=${LAWD_CD}&clsf=${clsf}`;
+
+      let url = "/WebBasic/apttrade?" + params; // URL 자동 처리 불가능
+
+      let response = await fetch(url);
+      let aptList = await response.json(); // javascript array (안에있는 object는 백엔드에서 보낸 HouseDeal 객체의 내용이 담겨있다.)
+
+      let tbodyAptTrade = document.querySelector("#tbodyAptTrade");
+      tbodyAptTrade.innerHTML = '';
+
+      aptList.forEach( el => {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `<tr><td>${el.dong}</td><td>${el.aptName}</td><td>${el.code}</td><td>${el.dealAmount}</td></tr>`;
+      })
+    }
+    </script>
+</body>
+</html>
